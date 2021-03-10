@@ -143,13 +143,19 @@ arduboy-homemade.menu.display.sh1106.usb_product_postfix=1106
 arduboy-homemade.menu.display.sh1106.bootloader_display=-sh1106
 arduboy-homemade.menu.display.sh1106.build.extra_flags=-DARDUBOY_10 -DOLED_SH1106 {build.flash_cs} {build.usb_flags}
 
+arduboy-homemade.menu.display.sh1106i2c=SH1106-I2C (2 Mbps)
+arduboy-homemade.menu.display.sh1106i2c.build.display=-sh1106i2c
+arduboy-homemade.menu.display.sh1106i2c.usb_product_postfix=I2C
+arduboy-homemade.menu.display.sh1106i2c.bootloader_display=
+arduboy-homemade.menu.display.sh1106i2c.build.extra_flags=-DARDUBOY_10 -DOLED_SH1106_I2C {build.flash_cs} {build.usb_flags}
+
 arduboy-homemade.menu.display.ssd1306=SSD1306
 arduboy-homemade.menu.display.ssd1306.build.display=-ssd1306
 arduboy-homemade.menu.display.ssd1306.usb_product_postfix=1306
 arduboy-homemade.menu.display.ssd1306.bootloader_display=
 arduboy-homemade.menu.display.ssd1306.build.extra_flags=-DARDUBOY_10 -DOLED_SSD1306 {build.flash_cs} {build.usb_flags}
 
-arduboy-homemade.menu.display.ssd1306i2c=SSD1306-I2C (2 Mbps)
+arduboy-homemade.menu.display.ssd1306i2c=SSD1306-I2C
 arduboy-homemade.menu.display.ssd1306i2c.build.display=-ssd1306i2c
 arduboy-homemade.menu.display.ssd1306i2c.usb_product_postfix=I2C
 arduboy-homemade.menu.display.ssd1306i2c.bootloader_display=

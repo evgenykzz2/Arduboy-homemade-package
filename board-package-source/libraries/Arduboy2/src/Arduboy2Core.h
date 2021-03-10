@@ -78,7 +78,7 @@ extern volatile unsigned char bootloader_timer;
 #define SPI_SCK_PORT PORTB
 #define SPI_SCK_BIT PORTB1
 
-#if defined (OLED_SSD1306_I2C) || (OLED_SSD1306_I2CX)
+#if defined (OLED_SSD1306_I2C) || (OLED_SSD1306_I2CX) || (OLED_SH1106_I2C)
  #define I2C_PORT  PORTD
  #define I2C_DDR   DDRD
  #define I2C_PIN   PIND
@@ -330,12 +330,13 @@ extern volatile unsigned char bootloader_timer;
 #define OLED_HORIZ_NORMAL 0xA1 // normal segment re-map
 
 #define OLED_SET_PAGE_ADDRESS      0xB0
-#ifdef OLED_SH1106
+#if defined(OLED_SH1106) || defined(OLED_SH1106_I2C)
   #define OLED_SET_COLUMN_ADDRESS_LO 0x02 //SH1106 only: 1st pixel starts on column 2
 #else
   #define OLED_SET_COLUMN_ADDRESS_LO 0x00 
 #endif
 #define OLED_SET_COLUMN_ADDRESS_HI 0x10
+
 // -----
 #if defined (OLED_96X96) || (OLED_96X96_ON_128X128)
   #define WIDTH 96
@@ -548,9 +549,8 @@ class Arduboy2Core : public Arduboy2NoUSB
      */
     static uint8_t SPItransferAndRead(uint8_t data);
 
-#if defined (OLED_SSD1306_I2C) || (OLED_SSD1306_I2CX)
+#if defined (OLED_SSD1306_I2C) || (OLED_SSD1306_I2CX) || (OLED_SH1106_I2C)
     void static i2c_start(uint8_t mode);
-    
     void static inline i2c_stop() __attribute__((always_inline))
     {
       // SDA and SCL both are already low, from writing ACK bit no need to change state

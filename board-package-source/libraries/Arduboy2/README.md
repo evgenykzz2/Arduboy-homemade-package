@@ -1,5 +1,7 @@
 # Arduboy2 (Homemade) Library 
 
+Added SSH1106 I2C display
+
 This is a fork of the Arduboy2 Library with support for alternate displays: SH1106, SSD1309, displays with 4-bit pixel depth and alternate resolution: SSD1327 (128x96) and SSD1329 (96x96) as wel as alternate pin wiring for a (SparkFun) Pro Micro.
 
 The original Arduboy2 library is maintained in a git repository hosted on [GitHub](https://github.com/) at:

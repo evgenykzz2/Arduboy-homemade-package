@@ -27,13 +27,13 @@ const PROGMEM uint8_t Arduboy2Core::lcdBootProgram[] = {
   0x47,                         // set brightness
   0x64, 0x00,                   // set x position 0
   0x84,                         // address mode set: X increment
-#elif defined(OLED_SH1106)
+#elif defined(OLED_SH1106) || (OLED_SH1106_I2C)
   0x8D, 0x14,                   // Charge Pump Setting v = enable (0x14)
   0xA1,                         // Set Segment Re-map
   0xC8,                         // Set COM Output Scan Direction
   0x81, 0xCF,                   // Set Contrast v = 0xCF
   0xD9, 0xF1,                   // Set Precharge = 0xF1
-  OLED_SET_COLUMN_ADDRESS_LO,   //Set column address for left most pixel 
+  OLED_SET_COLUMN_ADDRESS_LO,   //Set column address for left most pixel
   0xAF                          // Display On
 #elif defined(LCD_ST7565)
   0xC8,                         //SET_COM_REVERSE
@@ -224,11 +224,11 @@ void Arduboy2Core::bootPins()
           _BV(TX_LED_BIT) | //TX LED off for Arduboy and non Micro based Arduino
          #endif          
           _BV(CART_BIT) | 
-         #if !(defined(OLED_SSD1306_I2C) || (OLED_SSD1306_I2CX))
+         #if !(defined(OLED_SSD1306_I2C) || (OLED_SSD1306_I2CX) || (OLED_SH1106_I2C))
           _BV(DC_BIT) |
          #endif
           0) & ~( // Port D INPUTs or LOW outputs
-         #if !(defined(OLED_SSD1306_I2C) || (OLED_SSD1306_I2CX))
+         #if !(defined(OLED_SSD1306_I2C) || (OLED_SSD1306_I2CX) || (OLED_SH1106_I2C))
           _BV(CS_BIT) |  // oled display enabled
           _BV(RST_BIT) | // reset active
          #endif
@@ -238,7 +238,7 @@ void Arduboy2Core::bootPins()
          #if defined(LCD_ST7565)
           _BV(POWER_LED_BIT) |
          #endif
-         #if defined(OLED_SSD1306_I2C) || (OLED_SSD1306_I2CX)
+         #if defined(OLED_SSD1306_I2C) || (OLED_SSD1306_I2CX) || (OLED_SH1106_I2C)
           _BV(I2C_SCL) |
           _BV(I2C_SDA) |
          #endif
@@ -246,7 +246,7 @@ void Arduboy2Core::bootPins()
 
   // Port D outputs
   DDRD = (
-        #if !(defined(OLED_SSD1306_I2C) || (OLED_SSD1306_I2CX))
+        #if !(defined(OLED_SSD1306_I2C) || (OLED_SSD1306_I2CX) || (OLED_SH1106_I2C))
          _BV(DC_BIT) | 
         #endif
         #if !(defined(AB_ALTERNATE_WIRING) && (CART_CS_SDA))
@@ -262,7 +262,7 @@ void Arduboy2Core::bootPins()
          _BV(CART_BIT) |
          _BV(TX_LED_BIT) |
          0) & ~(// Port D inputs
-         #if defined(OLED_SSD1306_I2C) || (OLED_SSD1306_I2CX)
+         #if defined(OLED_SSD1306_I2C) || (OLED_SSD1306_I2CX) || (OLED_SH1106_I2C)
           _BV(I2C_SCL) | // SDA and SCL as inputs without pullups
           _BV(I2C_SDA) | // (both externally pulled up)
          #endif
@@ -349,7 +349,7 @@ void Arduboy2Core::bootOLED()
       displayWrite(pgm_read_byte(lcdBootProgram + i - 8));
   }
   displayDisable();
-#elif defined(OLED_SSD1306_I2C) || (OLED_SSD1306_I2CX)
+#elif defined(OLED_SSD1306_I2C) || (OLED_SSD1306_I2CX) || (OLED_SH1106_I2C)
   i2c_start(SSD1306_I2C_CMD);
   for (uint8_t i = 0; i < sizeof(lcdBootProgram); i++)
     i2c_sendByte(pgm_read_byte(lcdBootProgram + i));
@@ -418,7 +418,7 @@ void Arduboy2Core::SPItransfer(uint8_t data)
   while (!(SPSR & _BV(SPIF))) { } // wait
 }
 
-#if defined(OLED_SSD1306_I2C) || (OLED_SSD1306_I2CX)
+#if defined(OLED_SSD1306_I2C) || (OLED_SSD1306_I2CX) || (OLED_SH1106_I2C)
 void Arduboy2Core::i2c_start(uint8_t mode)
 {
   I2C_SDA_LOW();       // disable posible internal pullup, ensure SDA low on enabling output
@@ -529,13 +529,13 @@ void Arduboy2Core::displayOff()
   displayWrite(0x20);
   displayWrite(0x00);
   displayDisable();
-#elif defined(OLED_SSD1306_I2C) || (OLED_SSD1306_I2CX)
+#elif defined(OLED_SSD1306_I2C) || (OLED_SSD1306_I2CX) || (OLED_SH1106_I2C)
   i2c_start(SSD1306_I2C_CMD);    
   i2c_sendByte(0xAE); // display off
   i2c_sendByte(0x8D); // charge pump:
   i2c_sendByte(0x10); //   disable
   i2c_stop();
-#else    
+#else   
   LCDCommandMode();
   SPItransfer(0xAE); // display off
   SPItransfer(0x8D); // charge pump:
@@ -554,7 +554,7 @@ void Arduboy2Core::displayOn()
 
 void Arduboy2Core::paint8Pixels(uint8_t pixels)
 {
-#if defined(OLED_SSD1306_I2C) || (OLED_SSD1306_I2CX)
+#if defined(OLED_SSD1306_I2C) || (OLED_SSD1306_I2CX) || (OLED_SH1106_I2C)
   i2c_start(SSD1306_I2C_DATA);
   i2c_sendByte(pixels);
   i2c_stop();
@@ -587,6 +587,19 @@ void Arduboy2Core::paintScreen(const uint8_t *image)
   for (int i = 0; i < (HEIGHT * WIDTH) / 8; i++)
     i2c_sendByte(pgm_read_byte(image+i));
   i2c_stop();
+#elif  defined (OLED_SH1106_I2C)
+  for (int page = 0; page < HEIGHT/8; page++)
+  {
+    i2c_start(SSD1306_I2C_CMD);
+    i2c_sendByte(OLED_SET_PAGE_ADDRESS + page); // set page
+    i2c_sendByte(OLED_SET_COLUMN_ADDRESS_HI);   // only reset hi nibble to zero
+    i2c_stop();
+    const uint8_t *line = image + page*WIDTH;
+    i2c_start(SSD1306_I2C_DATA);
+    for (int i = 0; i < WIDTH; i++)
+      i2c_sendByte(pgm_read_byte(line+i));
+    i2c_stop();
+  }
 #elif defined(OLED_SH1106) || defined(LCD_ST7565)
   for (uint8_t i = 0; i < HEIGHT / 8; i++)
   {
@@ -807,7 +820,28 @@ void Arduboy2Core::paintScreen(uint8_t image[], bool clear)
   );
  #endif
   i2c_stop();
-  
+#elif  defined (OLED_SH1106_I2C)
+  for (int page = 0; page < HEIGHT/8; page++)
+  {
+    i2c_start(SSD1306_I2C_CMD);
+    i2c_sendByte(OLED_SET_PAGE_ADDRESS + page); // set page
+    i2c_sendByte(OLED_SET_COLUMN_ADDRESS_HI);
+    i2c_stop();
+    i2c_start(SSD1306_I2C_DATA);
+    if (clear)
+    {
+      for (int i = 0; i < WIDTH; i++)
+      {
+        i2c_sendByte(*image);
+        *(image++) = 0;
+      }
+    } else
+    {
+      for (int i = 0; i < WIDTH; i++)
+        i2c_sendByte(*(image++));
+    }
+    i2c_stop();
+  }
 #elif defined(OLED_SH1106) || defined(LCD_ST7565)
   //Assembly optimized page mode display code with clear support.
   //Each byte transfer takes 18 cycles
@@ -1025,7 +1059,19 @@ void Arduboy2Core::blank()
   for (int i = 0; i < (HEIGHT * WIDTH) / 8; i++)
     i2c_sendByte(0);
   i2c_stop();
-#else  
+#elif  defined (OLED_SH1106_I2C)
+  for (int page = 0; page < HEIGHT/8; page++)
+  {
+    i2c_start(SSD1306_I2C_CMD);
+    i2c_sendByte(OLED_SET_PAGE_ADDRESS + page); // set page
+    i2c_sendByte(OLED_SET_COLUMN_ADDRESS_HI);   // only reset hi nibble to zero
+    i2c_stop();
+    i2c_start(SSD1306_I2C_DATA);
+    for (int i = 0; i < WIDTH; i++)
+      i2c_sendByte(0);
+    i2c_stop();
+  }
+#else
  #if defined (OLED_SH1106)
   for (int i = 0; i < (HEIGHT * 132) / 8; i++)
  #elif defined(OLED_96X96) || defined(OLED_128X96) || defined(OLED_128X128)|| defined(OLED_128X64_ON_96X96) || defined(OLED_128X64_ON_128X96) || defined(OLED_128X64_ON_128X128)|| defined(OLED_128X96_ON_128X128) || defined(OLED_96X96_ON_128X128) || defined(OLED_64X128_ON_128X128)
@@ -1039,7 +1085,7 @@ void Arduboy2Core::blank()
 
 void Arduboy2Core::sendLCDCommand(uint8_t command)
 {
-#if defined(OLED_SSD1306_I2C) || (OLED_SSD1306_I2CX)
+#if defined(OLED_SSD1306_I2C) || (OLED_SSD1306_I2CX) || (OLED_SH1106_I2C)
   i2c_start(SSD1306_I2C_CMD);
   i2c_sendByte(command);
   i2c_stop();
